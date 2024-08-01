@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="solution-service" />
         <module name="service-registry" />
         <module name="problem-service" />
       </profile>
@@ -14,12 +15,14 @@
     <bytecodeTargetLevel>
       <module name="problem-service" target="18" />
       <module name="service-registry" target="18" />
+      <module name="solution-service" target="18" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="problem-service" options="-parameters" />
       <module name="service-registry" options="-parameters" />
+      <module name="solution-service" options="-parameters" />
     </option>
   </component>
 </project>

@@ -27,6 +27,11 @@ public class ProblemController {
         return problemService.getAll();
     }
 
+    @GetMapping("/{problemId}")
+    public ResponseEntity<ProblemResponseDto> getProblemById(@PathVariable Integer problemId) {
+        return problemService.getProblemById(problemId);
+    }
+
     @PutMapping("/update/{problemId}")
     public ResponseEntity<ProblemResponseDto> update(@PathVariable Integer problemId,
                                                      @RequestBody @Valid ProblemRequestDto request) {
@@ -37,7 +42,6 @@ public class ProblemController {
     public ResponseEntity<Map<Integer, ProblemResponseDto>> delete(@PathVariable Integer problemId) {
         return problemService.delete(problemId);
     }
-
 
     @GetMapping("/next")
     public ResponseEntity<ProblemResponseDto> nextProblem() {

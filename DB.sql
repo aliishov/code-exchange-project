@@ -20,11 +20,11 @@ CREATE TABLE problem_category (
 
 CREATE TABLE solutions (
 	id SERIAL PRIMARY KEY,
-	problem_id INTEGER NOT NULL REFERENCES problems(id),
 	solution_code TEXT NOT NULL,
+    problem_id INTEGER NOT NULL REFERENCES problems(id),
 	status VARCHAR(50) NOT NULL,
 	submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	evaluated_at TIMESTAMP
+	updated_at TIMESTAMP
 );
 
 INSERT INTO categories (category_name) VALUES

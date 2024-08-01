@@ -8,7 +8,6 @@ import com.raul.problem_service.utils.exceptions.ProblemNotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -65,6 +64,20 @@ public class ProblemService {
         log.info("Found {} problems", problemHash.size());
 
         return new ResponseEntity<>(problemHash, HttpStatus.OK);
+    }
+
+    public ResponseEntity<ProblemResponseDto> getProblemById(Integer problemId) {
+
+        log.info("Fetching problem with ID: {}", problemId);
+
+        var problem = problemHash.get(problemId);
+
+        if (problem == null) {
+            log.warn("No problem found");
+            throw new ProblemNotFoundException("Problem not found :/");
+        }
+
+        return new ResponseEntity<>(problem, HttpStatus.OK);
     }
 
     public ResponseEntity<ProblemResponseDto> update(Integer problemId, ProblemRequestDto request) {
@@ -124,11 +137,8 @@ public class ProblemService {
     public ResponseEntity<ProblemResponseDto> nextProblem() {
         var nextProblem = problemQueue.poll();
 
-        log.info("Retrieved next task: {}", nextProblem);
-
-        if (nextProblem == null) {
-            throw new ProblemNotFoundException("No problems available in the queue");
-        }
+        assert nextProblem != null;
+        log.info("Retrieved next task: {}", nextProblem.getDescription());
 
         return new ResponseEntity<>(converter.convertToProblemResponse(nextProblem), HttpStatus.OK);
     }
