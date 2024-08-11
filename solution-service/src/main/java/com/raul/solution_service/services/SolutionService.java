@@ -1,21 +1,25 @@
 package com.raul.solution_service.services;
 
+import com.raul.solution_service.clients.EvaluationClient;
+import com.raul.solution_service.dto.solutionDto.SolutionEvaluationDto;
 import com.raul.solution_service.dto.solutionDto.SolutionRequestDto;
 import com.raul.solution_service.dto.solutionDto.SolutionResponseDto;
-import com.raul.solution_service.models.Solution;
+import com.raul.solution_service.models.Status;
 import com.raul.solution_service.repositories.SolutionRepository;
 import com.raul.solution_service.utils.exceptions.SolutionNotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,16 +27,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SolutionService {
 
+    @Value("$rabbitmq.queue.name")
+    private String queueName;
     private final SolutionRepository repository;
     private final SolutionConverter converter;
     private final Map<Integer, SolutionResponseDto> solutionHash = new HashMap<>();
+    private final RabbitTemplate rabbitTemplate;
+    private final EvaluationClient evaluationClient;
 
     @PostConstruct
     @Transactional
     public void init() {
         log.info("Initializing solution HashTable with existing solutions from database.");
-        var solutions = repository.findAll();
 
+        var solutions = repository.findAll();
         solutions.forEach(solution -> solutionHash.put(solution.getId(), converter.convertToSolutionResponse(solution)));
 
         log.info("Initialization complete. {} solutions added to the queue.", solutions.size());
@@ -43,10 +51,17 @@ public class SolutionService {
         log.info("Creating a new solution for  problem ith ID: {}", request.problemId());
 
         var solution = converter.convertToSolution(request);
+//        repository.save(solution);
+
+        log.info("Checking evaluation for solution with ID: {}", solution.getId());
+
+        sendSolutionForEvaluate(request.problemId(), request.solutionCode());
+        var evaluation = Objects.requireNonNull(evaluationClient.getEvaluationBySolutionId(solution.getId()).getBody()).isSuccess();
+
+        solution.setStatus(evaluation ? Status.ACCEPTED : Status.REJECTED);
         repository.save(solution);
 
         var solutionResponse = converter.convertToSolutionResponse(solution);
-
         solutionHash.put(solution.getId(), solutionResponse);
 
         log.info("Solution created with ID: {}", solution.getId());
@@ -54,33 +69,8 @@ public class SolutionService {
         return new ResponseEntity<>(solutionResponse, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<SolutionResponseDto> update(Integer solutionId, SolutionRequestDto request) {
-        log.info("Updating solution with ID: {}", solutionId);
-
-        var solution = repository.findById(solutionId)
-                .orElseThrow(() -> new SolutionNotFoundException("Solution with ID: " + solutionId + " not found"));
-
-        updateSolutionFromRequest(solution, request);
-        repository.save(solution);
-
-        var solutionResponse = converter.convertToSolutionResponse(solution);
-        solutionHash.put(solution.getId(), solutionResponse);
-
-        log.info("Solution with ID: {} updated", solution.getId());
-
-
-        return new ResponseEntity<>(solutionResponse, HttpStatus.ACCEPTED);
-    }
-
-    private void updateSolutionFromRequest(Solution solution, SolutionRequestDto request) {
-
-        log.debug("Updating solution fields for ID: {}", solution.getId());
-
-        solution.setSolutionCode(request.solutionCode());
-        solution.setStatus(request.status());
-        solution.setUpdatedAt(LocalDateTime.now());
-
-        log.debug("Solution fields updated for ID: {}", solution.getId());
+    private void sendSolutionForEvaluate(Integer solutionId, String solutionCode) {
+        rabbitTemplate.convertAndSend(queueName, new SolutionEvaluationDto(solutionId, solutionCode));
     }
 
     public ResponseEntity<Map<Integer, SolutionResponseDto>> getSolutionByProblemId(Integer problemId) {

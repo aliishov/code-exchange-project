@@ -22,12 +22,6 @@ public class SolutionController {
         return solutionService.create(request);
     }
 
-    @PutMapping("update/{solutionId}")
-    public ResponseEntity<SolutionResponseDto> update(@PathVariable Integer solutionId,
-                                                      @RequestBody @Valid SolutionRequestDto request) {
-        return solutionService.update(solutionId, request);
-    }
-
     @GetMapping("problem/{problemId}")
     public ResponseEntity<Map<Integer, SolutionResponseDto>> getSolutionByProblemId(@PathVariable Integer problemId) {
         return solutionService.getSolutionByProblemId(problemId);

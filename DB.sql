@@ -27,6 +27,13 @@ CREATE TABLE solutions (
 	updated_at TIMESTAMP
 );
 
+CREATE TABLE evaluations (
+    id SERIAL PRIMARY KEY,
+    solution_id INTEGER NOT NULL,
+    is_success BOOLEAN NOT NULL,
+    evaluated_at TIMESTAMP NOT NULL
+);
+
 INSERT INTO categories (category_name) VALUES
 ('ARRAYS'),
 ('STRINGS'),

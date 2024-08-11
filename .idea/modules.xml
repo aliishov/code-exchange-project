@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/code-excange-project.iml" filepath="$PROJECT_DIR$/.idea/code-excange-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/evaluation-service/evaluation-service.iml" filepath="$PROJECT_DIR$/evaluation-service/evaluation-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/problem-service/problem-service.iml" filepath="$PROJECT_DIR$/problem-service/problem-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/service-registry/service-registry.iml" filepath="$PROJECT_DIR$/service-registry/service-registry.iml" />
       <module fileurl="file://$PROJECT_DIR$/solution-service/solution-service.iml" filepath="$PROJECT_DIR$/solution-service/solution-service.iml" />

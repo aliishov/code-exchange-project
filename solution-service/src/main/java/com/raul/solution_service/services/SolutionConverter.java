@@ -4,6 +4,7 @@ import com.raul.solution_service.clients.ProblemClient;
 import com.raul.solution_service.dto.solutionDto.SolutionRequestDto;
 import com.raul.solution_service.dto.solutionDto.SolutionResponseDto;
 import com.raul.solution_service.models.Solution;
+import com.raul.solution_service.models.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,7 @@ public class SolutionConverter {
         return Solution.builder()
                 .solutionCode(request.solutionCode())
                 .problemId(request.problemId())
-                .status(request.status())
+                .status(Status.PENDING)
                 .submittedAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
